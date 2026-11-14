@@ -1,15 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:workltapp/domain/entities/job.dart';
-import 'package:workltapp/domain/entities/proposal.dart';
-import 'package:workltapp/domain/use_cases/accept_proposal_use_case.dart';
-import 'package:workltapp/domain/use_cases/create_job_use_case.dart';
-import 'package:workltapp/domain/use_cases/get_open_jobs_use_case.dart';
-import 'package:workltapp/domain/use_cases/submit_proposal_use_case.dart';
-import 'package:workltapp/data/repositories/in_memory_job_repository.dart';
+import 'package:worklyapp/domain/entities/job.dart';
+import 'package:worklyapp/domain/entities/proposal.dart';
+import 'package:worklyapp/domain/use_cases/accept_proposal_use_case.dart';
+import 'package:worklyapp/domain/use_cases/create_job_use_case.dart';
+import 'package:worklyapp/domain/use_cases/get_open_jobs_use_case.dart';
+import 'package:worklyapp/domain/use_cases/submit_proposal_use_case.dart';
+import 'package:worklyapp/data/repositories/in_memory_job_repository.dart';
+import 'package:worklyapp/data/repositories/in_memory_contract_repository.dart';
 
 void main() {
   group('Workly core business logic', () {
     late InMemoryJobRepository repository;
+    late InMemoryContractRepository contractRepository;
     late CreateJobUseCase createJobUseCase;
     late GetOpenJobsUseCase getOpenJobsUseCase;
     late SubmitProposalUseCase submitProposalUseCase;
@@ -17,10 +19,15 @@ void main() {
 
     setUp(() {
       repository = InMemoryJobRepository();
+      contractRepository = InMemoryContractRepository();
       createJobUseCase = CreateJobUseCase(repository);
       getOpenJobsUseCase = GetOpenJobsUseCase(repository);
-      submitProposalUseCase = SubmitProposalUseCase(repository);
-      acceptProposalUseCase = AcceptProposalUseCase(repository);
+      submitProposalUseCase = SubmitProposalUseCase(repository, repository);
+      acceptProposalUseCase = AcceptProposalUseCase(
+        repository,
+        repository,
+        contractRepository,
+      );
     });
 
     test('create job succeeds with valid data', () async {
@@ -86,37 +93,40 @@ void main() {
       expect(jobs.single.title, 'Open job');
     });
 
-    test('submit proposal succeeds for an open job and prevents duplicates', () async {
-      final job = await createJobUseCase.execute(
-        clientId: 'client_1',
-        title: 'Full stack dashboard',
-        description: 'Looking for a freelancer to build dashboard.',
-        category: 'Web App',
-        skills: const ['Dart', 'API'],
-        budgetMin: 200,
-        budgetMax: 800,
-        deadline: DateTime.now().add(const Duration(days: 12)),
-      );
+    test(
+      'submit proposal succeeds for an open job and prevents duplicates',
+      () async {
+        final job = await createJobUseCase.execute(
+          clientId: 'client_1',
+          title: 'Full stack dashboard',
+          description: 'Looking for a freelancer to build dashboard.',
+          category: 'Web App',
+          skills: const ['Dart', 'API'],
+          budgetMin: 200,
+          budgetMax: 800,
+          deadline: DateTime.now().add(const Duration(days: 12)),
+        );
 
-      final firstProposal = await submitProposalUseCase.execute(
-        jobId: job.id,
-        freelancerId: 'freelancer_1',
-        price: 700,
-        coverLetter: 'I can do it quickly.',
-      );
-
-      expect(firstProposal.status, ProposalStatus.pending);
-
-      expect(
-        () => submitProposalUseCase.execute(
+        final firstProposal = await submitProposalUseCase.execute(
           jobId: job.id,
           freelancerId: 'freelancer_1',
-          price: 750,
-          coverLetter: 'This should fail due to duplicate.',
-        ),
-        throwsStateError,
-      );
-    });
+          price: 700,
+          coverLetter: 'I can do it quickly.',
+        );
+
+        expect(firstProposal.status, ProposalStatus.pending);
+
+        expect(
+          () => submitProposalUseCase.execute(
+            jobId: job.id,
+            freelancerId: 'freelancer_1',
+            price: 750,
+            coverLetter: 'This should fail due to duplicate.',
+          ),
+          throwsStateError,
+        );
+      },
+    );
 
     test('accept proposal changes job status to inProgress', () async {
       final job = await createJobUseCase.execute(
@@ -138,6 +148,7 @@ void main() {
       );
 
       final acceptedProposal = await acceptProposalUseCase.execute(
+        clientId: 'client_1',
         jobId: job.id,
         proposalId: proposal.id,
       );
@@ -146,6 +157,10 @@ void main() {
 
       final savedJob = await repository.getJobById(job.id);
       expect(savedJob?.status, JobStatus.inProgress);
+      expect(
+        await contractRepository.getContractByProposalId(proposal.id),
+        isNotNull,
+      );
     });
   });
 }

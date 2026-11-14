@@ -1,7 +1,5 @@
 enum JobStatus { open, inProgress, submitted, completed, cancelled, closed }
 
-enum ProposalStatus { pending, accepted, rejected }
-
 class Job {
   Job({
     required this.id,
@@ -9,19 +7,22 @@ class Job {
     required this.title,
     required this.description,
     required this.category,
+    String? categoryId,
     required this.skills,
     required this.budgetMin,
     required this.budgetMax,
     required this.deadline,
     this.status = JobStatus.open,
     DateTime? createdAt,
-  }) : createdAt = createdAt ?? DateTime.now();
+  }) : categoryId = categoryId ?? category,
+       createdAt = createdAt ?? DateTime.now();
 
   final String id;
   final String clientId;
   final String title;
   final String description;
   final String category;
+  final String categoryId;
   final List<String> skills;
   final double budgetMin;
   final double budgetMax;
@@ -35,6 +36,7 @@ class Job {
     String? title,
     String? description,
     String? category,
+    String? categoryId,
     List<String>? skills,
     double? budgetMin,
     double? budgetMax,
@@ -48,6 +50,7 @@ class Job {
       title: title ?? this.title,
       description: description ?? this.description,
       category: category ?? this.category,
+      categoryId: categoryId ?? this.categoryId,
       skills: skills ?? this.skills,
       budgetMin: budgetMin ?? this.budgetMin,
       budgetMax: budgetMax ?? this.budgetMax,

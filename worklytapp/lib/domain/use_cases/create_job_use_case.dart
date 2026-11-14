@@ -1,5 +1,5 @@
-import 'package:workltapp/domain/entities/job.dart';
-import 'package:workltapp/domain/repositories/job_repository.dart';
+import 'package:worklyapp/domain/entities/job.dart';
+import 'package:worklyapp/domain/repositories/job_repository.dart';
 
 class CreateJobUseCase {
   static int _idSequence = 0;
@@ -13,6 +13,7 @@ class CreateJobUseCase {
     required String title,
     required String description,
     required String category,
+    String? categoryId,
     required List<String> skills,
     required double budgetMin,
     required double budgetMax,
@@ -59,6 +60,9 @@ class CreateJobUseCase {
       title: title.trim(),
       description: description.trim(),
       category: category.trim(),
+      categoryId: categoryId?.trim().isNotEmpty == true
+          ? categoryId!.trim()
+          : category.trim(),
       skills: normalizedSkills,
       budgetMin: budgetMin,
       budgetMax: budgetMax,
