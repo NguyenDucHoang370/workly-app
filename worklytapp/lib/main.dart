@@ -1,15 +1,21 @@
 import 'package:flutter/material.dart';
-import 'package:workltapp/data/repositories/in_memory_job_repository.dart';
-import 'package:workltapp/domain/use_cases/accept_proposal_use_case.dart';
-import 'package:workltapp/domain/use_cases/create_job_use_case.dart';
-import 'package:workltapp/domain/use_cases/submit_proposal_use_case.dart';
+import 'package:worklyapp/data/repositories/in_memory_job_repository.dart';
+import 'package:worklyapp/data/repositories/in_memory_contract_repository.dart';
+import 'package:worklyapp/domain/use_cases/accept_proposal_use_case.dart';
+import 'package:worklyapp/domain/use_cases/create_job_use_case.dart';
+import 'package:worklyapp/domain/use_cases/submit_proposal_use_case.dart';
 
 void main() async {
   final repository = InMemoryJobRepository();
+  final contractRepository = InMemoryContractRepository();
 
   final createJobUseCase = CreateJobUseCase(repository);
-  final submitProposalUseCase = SubmitProposalUseCase(repository);
-  final acceptProposalUseCase = AcceptProposalUseCase(repository);
+  final submitProposalUseCase = SubmitProposalUseCase(repository, repository);
+  final acceptProposalUseCase = AcceptProposalUseCase(
+    repository,
+    repository,
+    contractRepository,
+  );
 
   final createdJob = await createJobUseCase.execute(
     clientId: 'client_1',
@@ -30,6 +36,7 @@ void main() async {
   );
 
   await acceptProposalUseCase.execute(
+    clientId: 'client_1',
     jobId: createdJob.id,
     proposalId: submittedProposal.id,
   );

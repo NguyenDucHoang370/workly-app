@@ -1,13 +1,15 @@
-import 'package:workltapp/domain/entities/job.dart';
-import 'package:workltapp/domain/entities/proposal.dart';
-import 'package:workltapp/domain/repositories/job_repository.dart';
+import 'package:worklyapp/domain/entities/job.dart';
+import 'package:worklyapp/domain/entities/proposal.dart';
+import 'package:worklyapp/domain/repositories/job_repository.dart';
+import 'package:worklyapp/domain/repositories/proposal_repository.dart';
 
 class SubmitProposalUseCase {
   static int _idSequence = 0;
 
-  SubmitProposalUseCase(this.repository);
+  const SubmitProposalUseCase(this.jobRepository, this.proposalRepository);
 
-  final JobRepository repository;
+  final JobRepository jobRepository;
+  final ProposalRepository proposalRepository;
 
   Future<Proposal> execute({
     required String jobId,
@@ -28,7 +30,7 @@ class SubmitProposalUseCase {
       throw ArgumentError('Cover letter is required.');
     }
 
-    final job = await repository.getJobById(jobId);
+    final job = await jobRepository.getJobById(jobId);
     if (job == null) {
       throw StateError('Job not found.');
     }
@@ -36,7 +38,9 @@ class SubmitProposalUseCase {
       throw StateError('Only open jobs can receive proposals.');
     }
 
-    final existingProposals = await repository.getProposalsForJob(jobId);
+    final existingProposals = await proposalRepository.getProposalsForJob(
+      jobId,
+    );
     final hasExistingProposal = existingProposals.any(
       (proposal) =>
           proposal.freelancerId == freelancerId &&
@@ -58,6 +62,6 @@ class SubmitProposalUseCase {
       status: ProposalStatus.pending,
     );
 
-    return repository.addProposal(proposal);
+    return proposalRepository.addProposal(proposal);
   }
 }

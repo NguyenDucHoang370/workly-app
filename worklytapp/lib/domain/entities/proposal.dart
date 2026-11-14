@@ -1,4 +1,4 @@
-import 'package:workltapp/domain/entities/job.dart';
+enum ProposalStatus { pending, accepted, rejected }
 
 class Proposal {
   Proposal({
@@ -7,6 +7,7 @@ class Proposal {
     required this.freelancerId,
     required this.price,
     required this.coverLetter,
+    this.durationDays,
     this.status = ProposalStatus.pending,
     DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
@@ -16,6 +17,7 @@ class Proposal {
   final String freelancerId;
   final double price;
   final String coverLetter;
+  final int? durationDays;
   final ProposalStatus status;
   final DateTime createdAt;
 
@@ -25,6 +27,7 @@ class Proposal {
     String? freelancerId,
     double? price,
     String? coverLetter,
+    int? durationDays,
     ProposalStatus? status,
     DateTime? createdAt,
   }) {
@@ -34,6 +37,7 @@ class Proposal {
       freelancerId: freelancerId ?? this.freelancerId,
       price: price ?? this.price,
       coverLetter: coverLetter ?? this.coverLetter,
+      durationDays: durationDays ?? this.durationDays,
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
     );
