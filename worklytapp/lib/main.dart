@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:workltapp/data/repositories/in_memory_job_repository.dart';
-import 'package:workltapp/domain/entities/job.dart';
 import 'package:workltapp/domain/use_cases/accept_proposal_use_case.dart';
 import 'package:workltapp/domain/use_cases/create_job_use_case.dart';
 import 'package:workltapp/domain/use_cases/submit_proposal_use_case.dart';
@@ -60,9 +59,7 @@ class WorklyHomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Workly'),
-      ),
+      appBar: AppBar(title: const Text('Workly')),
       body: const Center(
         child: Padding(
           padding: EdgeInsets.all(24),

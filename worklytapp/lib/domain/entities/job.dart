@@ -1,17 +1,6 @@
-enum JobStatus {
-  open,
-  inProgress,
-  submitted,
-  completed,
-  cancelled,
-  closed,
-}
+enum JobStatus { open, inProgress, submitted, completed, cancelled, closed }
 
-enum ProposalStatus {
-  pending,
-  accepted,
-  rejected,
-}
+enum ProposalStatus { pending, accepted, rejected }
 
 class Job {
   Job({
@@ -25,7 +14,7 @@ class Job {
     required this.budgetMax,
     required this.deadline,
     this.status = JobStatus.open,
-    this.createdAt,
+    DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
   final String id;

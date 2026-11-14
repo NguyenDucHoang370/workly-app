@@ -1,3 +1,5 @@
+import 'package:workltapp/domain/entities/job.dart';
+
 class Proposal {
   Proposal({
     required this.id,
@@ -6,7 +8,7 @@ class Proposal {
     required this.price,
     required this.coverLetter,
     this.status = ProposalStatus.pending,
-    this.createdAt,
+    DateTime? createdAt,
   }) : createdAt = createdAt ?? DateTime.now();
 
   final String id;

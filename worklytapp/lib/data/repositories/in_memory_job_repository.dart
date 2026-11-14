@@ -4,7 +4,8 @@ import 'package:workltapp/domain/repositories/job_repository.dart';
 
 class InMemoryJobRepository implements JobRepository {
   final List<Job> _jobs = <Job>[];
-  final Map<String, List<Proposal>> _proposalsByJobId = <String, List<Proposal>>{};
+  final Map<String, List<Proposal>> _proposalsByJobId =
+      <String, List<Proposal>>{};
 
   @override
   Future<List<Job>> getJobs() async {
@@ -19,20 +20,23 @@ class InMemoryJobRepository implements JobRepository {
 
   @override
   Future<Job?> getJobById(String jobId) async {
-    return _jobs.firstWhere(
-      (job) => job.id == jobId,
-      orElse: () => throw StateError('Job not found.'),
-    );
+    final index = _jobs.indexWhere((job) => job.id == jobId);
+    return index == -1 ? null : _jobs[index];
   }
 
   @override
   Future<List<Proposal>> getProposalsForJob(String jobId) async {
-    return List<Proposal>.unmodifiable(_proposalsByJobId[jobId] ?? const <Proposal>[]);
+    return List<Proposal>.unmodifiable(
+      _proposalsByJobId[jobId] ?? const <Proposal>[],
+    );
   }
 
   @override
   Future<Proposal> addProposal(Proposal proposal) async {
-    final list = _proposalsByJobId.putIfAbsent(proposal.jobId, () => <Proposal>[]);
+    final list = _proposalsByJobId.putIfAbsent(
+      proposal.jobId,
+      () => <Proposal>[],
+    );
     list.add(proposal);
     return proposal;
   }
